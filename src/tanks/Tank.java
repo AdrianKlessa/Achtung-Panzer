@@ -1,5 +1,7 @@
 package tanks;
 
+import java.util.List;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
@@ -11,7 +13,51 @@ public class Tank extends Sprite {
 	private boolean movingBack=false;
 	private Image turretImage;
 	private double turretRotationDeg;
+	private double HP=100;
+	private boolean isHost;
+	private double muzzleVelocity=15;
+	private double cooldownMax=100;
+	private double currentCooldown=0;
 	
+	//Ticking the cooldown on firing timer
+	public void tickCooldown() {
+		if(currentCooldown>0) {
+			currentCooldown-=1;
+		}
+		
+	}
+	
+	public boolean getIsHost() {
+		return isHost;
+	}
+	
+	public double getHP() {
+		return HP;
+	}
+	
+	public void setHP(double x) {
+		HP=x;
+	}
+	
+	public void shoot(double x, double y, List<Bullet> bulletList) {
+		if(currentCooldown<=0) {
+			double degX=this.posX-x;
+			double degY=this.posY-y;
+			double sin = Math.sin(Math.toRadians(turretRotationDeg-90));
+			double cos = Math.cos(Math.toRadians(turretRotationDeg-90));
+
+			double velX, velY;
+			
+			velX=cos*muzzleVelocity;
+			velY=sin*muzzleVelocity;
+			
+			Bullet bullet = new Bullet(this.posX,this.posY, velX, velY, isHost);
+			bulletList.add(bullet);
+			currentCooldown=cooldownMax;
+		}
+
+	}
+	//Stops tank movement
 	public void stop(){
 		this.setVelY(0);
 		this.setVelX(0);
@@ -19,6 +65,7 @@ public class Tank extends Sprite {
 		movingBack=false;
 	}
 	
+	//Sets the turret rotation based on the vector between it and the mouse cursor
 	public void updateTurretRotation(double mouseX, double mouseY) {
 		double degX=this.posX-mouseX;
 		double degY=this.posY-mouseY;
@@ -88,14 +135,16 @@ public class Tank extends Sprite {
 
 	}
 	
-	public Tank(Image image, Image turretImage, double x, double y, double velX,double velY) {
+	public Tank(Image image, Image turretImage, double x, double y, double velX,double velY, boolean isHost) {
 		super(image, x, y, velX,velY);
 		this.turretImage=turretImage;
+		this.isHost=isHost;
 	}
 	
-	public Tank(Image image, Image turretImage, double x, double y) {
+	public Tank(Image image, Image turretImage, double x, double y, boolean isHost) {
 		super(image,x,y);
 		this.turretImage=turretImage;
+		this.isHost=isHost;
 	}
 	
 	public void render(GraphicsContext gc) {

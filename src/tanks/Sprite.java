@@ -89,12 +89,14 @@ public class Sprite {
 	public Sprite() {
 		
 	}
-	
+	//Updating sprite location
 	public void update(double time) {
+		
 		posX+=velX*time;
 		posY+=velY*time;
 	}
 	
+	//Rotating the image render by degree
 	public Image rotateImage(Image image, int rotation) {
 	    ImageView imageView = new ImageView(image);
 	    SnapshotParameters params = new SnapshotParameters();
@@ -105,7 +107,7 @@ public class Sprite {
 	}
 	
 	
-	
+	//Rendering the image with rotation
 	public void render(GraphicsContext gc) {
 		
 		gc.drawImage(rotateImage(image,(int)(rotationDeg)), posX, posY);
@@ -116,6 +118,7 @@ public class Sprite {
 		return new Rectangle2D(posX,posY,width,height);
 	}
 	
+	//Checking for collision with other sprites
 	public boolean intersects(Sprite sprite) {
 		return sprite.getBoundary().intersects(this.getBoundary());
 	}
