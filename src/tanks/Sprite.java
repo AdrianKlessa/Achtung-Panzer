@@ -78,12 +78,18 @@ public class Sprite {
 		this.posY=y;
 		this.velX=velX;
 		this.velY=velY;
+		this.width=image.getWidth();
+		this.height=image.getHeight();
+		
 	}
 	
 	public Sprite(Image image, double x, double y) {
 		this.image=image;
 		this.posX=x;
 		this.posY=y;
+		this.width=image.getWidth();
+		this.height=image.getHeight();
+		
 	}
 	
 	public Sprite() {

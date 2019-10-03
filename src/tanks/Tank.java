@@ -152,4 +152,41 @@ public class Tank extends Sprite {
 		gc.drawImage(rotateImage(turretImage,(int)(turretRotationDeg)), posX, posY);
 		
 	}
+	
+	public void update(double time, List<Wall> wallList) {
+		//Collisions with walls
+		boolean collision=false;
+		for(int i=0; i<wallList.size();i++) {
+			posX+=velX*time;
+			posY+=velY*time;
+			
+			if(this.intersects(wallList.get(i))) {
+				collision=true;
+				
+			}
+			posX-=velX*time;
+			posY-=velY*time;
+		}
+		
+		
+		if(collision==false) {
+			
+			posX+=velX*time;
+			posY+=velY*time;
+		}else {
+			collision=false;
+			while(collision==false) {
+				posX+=velX*0.05*time;
+				posY+=velY*0.05*time;
+				for(int i=0; i<wallList.size();i++) {
+					if(this.intersects(wallList.get(i))) {
+						collision=true;
+						posX-=velX*0.05*time;
+						posY-=velY*0.05*time;
+					}
+				}
+			}
+		}
+
+	}
 }

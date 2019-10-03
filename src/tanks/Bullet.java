@@ -1,5 +1,7 @@
 package tanks;
 
+import java.util.List;
+
 import javafx.scene.image.Image;
 
 public class Bullet extends Sprite {
@@ -21,4 +23,31 @@ public class Bullet extends Sprite {
 		this.belongsToHost=belongsToHost;
 	}
 	
+	public boolean update(double time, List<Wall> wallList, List<Bullet> bulletList, int index) {
+		//Collisions with walls; returns true if collided and false if it didn't
+		boolean collision=false;
+		for(int i=0; i<wallList.size();i++) {
+			posX+=velX*time;
+			posY+=velY*time;
+			
+			if(this.intersects(wallList.get(i))&&!collision) {
+				collision=true;
+				wallList.get(i).reduceHp(damage);
+				bulletList.remove(index);
+				
+			}
+			posX-=velX*time;
+			posY-=velY*time;
+		}
+		
+		
+		if(collision==false) {
+			
+			posX+=velX*time;
+			posY+=velY*time;
+			
+		}	
+		return collision;
+
+	}
 }

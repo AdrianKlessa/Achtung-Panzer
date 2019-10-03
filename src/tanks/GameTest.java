@@ -36,6 +36,7 @@ public class GameTest extends Scene {
 	public GameTest() {
 		super(root);
 		
+		double framerate;
 		
 		
 		//Setting up the canvas
@@ -58,8 +59,8 @@ public class GameTest extends Scene {
 	    Image tankTurretIMG= new Image("tankTurret.png");
 	    
 	    //Creating player objects
-	    Tank tank = new Tank(tankIMG, tankTurretIMG, 500,500, true);
-	    
+	    Tank tankHost = new Tank(tankIMG, tankTurretIMG, 500,500, true);
+	    Tank tankClient = new Tank(tankIMG, tankTurretIMG, 1000, 50, true);
 	    
 	    //Creating walls
 	    for(int i=0;i<20;i++) {
@@ -71,58 +72,57 @@ public class GameTest extends Scene {
 	    this.setOnMouseMoved(e->{
 	    	mouseX=e.getSceneX();
 	    	mouseY=e.getSceneY();
-	    	tank.updateTurretRotation(mouseX, mouseY);
+	    	tankHost.updateTurretRotation(mouseX, mouseY);
 	    	
 	    });
 	    
 	    this.setOnKeyPressed(e->{
 	    	if(e.getCode()==KeyCode.LEFT) {
-	    		tank.turnLeft();
+	    		tankHost.turnLeft();
 	    		
 	    	}
 	    	
 	    	if(e.getCode()==KeyCode.RIGHT) {
-	    		tank.turnRight();
+	    		tankHost.turnRight();
 	    	}
 	    	if(e.getCode()==KeyCode.UP) {
 	    		
-	    		tank.goForward();
+	    		tankHost.goForward();
 	    		
 	    	}
 	    	if(e.getCode()==KeyCode.DOWN) {
-	    		tank.goBack();
+	    		tankHost.goBack();
 	    	}
 	    });
 	    
 	    this.setOnKeyReleased(e->{
 
 	    	if(e.getCode()==KeyCode.UP) {
-	    		tank.stop();
+	    		tankHost.stop();
 	    	}
 	    	if(e.getCode()==KeyCode.DOWN) {
-	    		tank.stop();
+	    		tankHost.stop();
 	    	}
 	    });
 	    
 	    this.setOnMousePressed(e->{
 	    	mouseX=e.getSceneX();
 	    	mouseY=e.getSceneY();
-	    	tank.updateTurretRotation(mouseX, mouseY);
-	    	tank.shoot(mouseX, mouseY, bulletList);
+	    	tankHost.updateTurretRotation(mouseX, mouseY);
+	    	tankHost.shoot(mouseX, mouseY, bulletList);
 	    });
 	    
 	    
 	    //Ticking
 	    new AnimationTimer()
 	    {
-	    	double degX, degY;
+	    	
+	        private final long[] frameTimes = new long[100];
+	        private boolean arrayFilled = false;
+	        private int frameTimeIndex = 0;
 	        public void handle(long currentNanoTime)
 	        {
-	        	//Setting up the tickrate
-	            double t = (currentNanoTime - startNanoTime) / 1000000000.0; 
-	 
 
-	            
 	            
 	 
 	            // background image clears canvas
@@ -131,30 +131,58 @@ public class GameTest extends Scene {
 	    		
 	    		//Rendering walls
 	            for(int i=0;i<wallList.size();i++) {
-	            	wallList.get(i).render(gc);
+	            	if(wallList.get(i).getHp()<=0) {
+	            		wallList.remove(i);
+	            	}else {
+	            		wallList.get(i).render(gc);
+	            	}
+	            	
 	            }
 	            
 	            //Rendering bullets
 	            for(int i=0;i<bulletList.size();i++) {
 	            	bullet=bulletList.get(i);
 	            	bullet.render(gc);
-	            	bullet.update(1);
-	            	if(bullet.getPosX()<0||bullet.getPosX()>1300||bullet.getPosY()<0||bullet.getPosY()>1300) {
-	            		//Removing bullets if they go out of bounds
-	            		bulletList.remove(i);
-	            		System.out.println("Removed bullet");
+	            	
+	            	if(!bullet.update(1, wallList, bulletList, i)) {
+		            	if(bullet.getPosX()<0||bullet.getPosX()>1300||bullet.getPosY()<0||bullet.getPosY()>1300) {
+		            		//Removing bullets if they go out of bounds
+		            		bulletList.remove(i);
+		            		System.out.println("Removed bullet");
+		            	}
 	            	}
+
 	            	
 	            }
 	            
+
+	            
 	            //Rendering the players
-	    		tank.updateTurretRotation(mouseX, mouseY);
-	            tank.render(gc);
-	            tank.update(1);
-	            tank.tickCooldown();
-	    		degX=tank.getPosX()-mouseX;
-	    		degY=tank.getPosY()-mouseY;
+	            tankHost.updateTurretRotation(mouseX, mouseY);
+	            tankHost.render(gc);
+	            tankHost.update(1, wallList);
+	            tankHost.tickCooldown();
 	    		
+	    		tankClient.render(gc);
+	    		tankClient.update(1,wallList);
+	    		tankClient.tickCooldown();
+	    		
+	    		
+	        	//Render rate
+	    		gc.setFill(Color.WHITE);
+	            long oldFrameTime = frameTimes[frameTimeIndex];
+
+	            frameTimes[frameTimeIndex] = currentNanoTime ;
+                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
+                if (frameTimeIndex == 0) {
+                    arrayFilled = true ;
+                }
+                if (arrayFilled) {
+                    long elapsedNanos = currentNanoTime - oldFrameTime ;
+                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
+                    double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                    gc.fillText(Double.toString(frameRate),60,50);
+                }
 	        }
 	    }.start();
 		
