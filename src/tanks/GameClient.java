@@ -22,7 +22,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-public class GameTest extends Scene {
+public class GameClient extends Scene {
 
 	
 	private static Group root = new Group();
@@ -39,10 +39,9 @@ public class GameTest extends Scene {
     Font endMessageFont = Font.font("Arial", FontWeight.BOLD, 50);
     Font fpsFont = Font.font("Arial",FontWeight.NORMAL, 15);
     
-	public GameTest() {
+	public GameClient() {
 		super(root);
 		
-		double framerate;
 		
 		
 		//Setting up the canvas
@@ -66,7 +65,7 @@ public class GameTest extends Scene {
 	    
 	    //Creating player objects
 	    Tank tankHost = new Tank(tankIMG, tankTurretIMG, 500,500, true);
-	    Tank tankClient = new Tank(tankIMG, tankTurretIMG, 1000, 50, true);
+	    Tank tankClient = new Tank(tankIMG, tankTurretIMG, 1000, 50, false);
 	    
 	    //Creating walls
 	    for(int i=0;i<20;i++) {
@@ -78,44 +77,44 @@ public class GameTest extends Scene {
 	    this.setOnMouseMoved(e->{
 	    	mouseX=e.getSceneX();
 	    	mouseY=e.getSceneY();
-	    	tankHost.updateTurretRotation(mouseX, mouseY);
+	    	tankClient.updateTurretRotation(mouseX, mouseY);
 	    	
 	    });
 	    
 	    this.setOnKeyPressed(e->{
 	    	if(e.getCode()==KeyCode.LEFT) {
-	    		tankHost.turnLeft();
+	    		tankClient.turnLeft();
 	    		
 	    	}
 	    	
 	    	if(e.getCode()==KeyCode.RIGHT) {
-	    		tankHost.turnRight();
+	    		tankClient.turnRight();
 	    	}
 	    	if(e.getCode()==KeyCode.UP) {
 	    		
-	    		tankHost.goForward();
+	    		tankClient.goForward();
 	    		
 	    	}
 	    	if(e.getCode()==KeyCode.DOWN) {
-	    		tankHost.goBack();
+	    		tankClient.goBack();
 	    	}
 	    });
 	    
 	    this.setOnKeyReleased(e->{
 
 	    	if(e.getCode()==KeyCode.UP) {
-	    		tankHost.stop();
+	    		tankClient.stop();
 	    	}
 	    	if(e.getCode()==KeyCode.DOWN) {
-	    		tankHost.stop();
+	    		tankClient.stop();
 	    	}
 	    });
 	    
 	    this.setOnMousePressed(e->{
 	    	mouseX=e.getSceneX();
 	    	mouseY=e.getSceneY();
-	    	tankHost.updateTurretRotation(mouseX, mouseY);
-	    	tankHost.shoot(mouseX, mouseY, bulletList);
+	    	tankClient.updateTurretRotation(mouseX, mouseY);
+	    	tankClient.shoot(mouseX, mouseY, bulletList);
 	    });
 	    
 	    
@@ -129,66 +128,11 @@ public class GameTest extends Scene {
 	        public void handle(long currentNanoTime)
 	        {
 
-	            System.out.print(java.lang.Thread.activeCount());
+	            
 	 
 	            // background image clears canvas
 	    		gc.setFill(background);
 	    		gc.fillRect(0,0,1200,800);
-	    		
-
-	            
-	            //Updating bullets
-	    		BulletUpdater BU = new BulletUpdater(bulletList, wallList, tankHost, tankClient);
-	    		BU.start();
-	    		
-	    		/*
-	    		
-	            for(int i=0;i<bulletList.size();i++) {
-	            	bullet=bulletList.get(i);
-	            	
-	            	if(!bullet.update(1, wallList, bulletList, i)) {
-		            	if(bullet.getPosX()<0||bullet.getPosX()>1300||bullet.getPosY()<0||bullet.getPosY()>1300) {
-		            		//Removing bullets if they go out of bounds
-		            		bulletList.remove(i);
-		            	}
-	            	}
-
-	            	
-	            }
-	            */
-
-	            //Updating the players
-	    		PlayerUpdater PU = new PlayerUpdater(mouseX,mouseY,wallList,tankHost,tankClient);
-	    		PU.start();
-	    		
-	    		 System.out.print("->"+java.lang.Thread.activeCount());
-	    		/*
-	            tankHost.updateTurretRotation(mouseX, mouseY);
-	            tankHost.update(1, wallList);
-	            tankHost.tickCooldown();
-	    		tankClient.update(1,wallList);
-	    		tankClient.tickCooldown();
-	    		*/
-	    		
-	    		try {
-					BU.join();
-					PU.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					System.out.println(e.getMessage());
-				}
-	    		
-	    		
-	            //Rendering the players
-	    		if(!clientWon) {
-	    			tankHost.render(gc);
-	    		}
-	    		
-	    		if(!hostWon) {
-	    			tankClient.render(gc);
-	    		}
-	            
-	    		
 	    		
 	    		//Rendering walls
 	            for(int i=0;i<wallList.size();i++) {
@@ -199,13 +143,35 @@ public class GameTest extends Scene {
 	            	}
 	            	
 	            }
-	    		
+	            
 	            //Rendering bullets
 	            for(int i=0;i<bulletList.size();i++) {
-	            	bulletList.get(i).render(gc);
+	            	bullet=bulletList.get(i);
+	            	bullet.render(gc);
+	            	
+	            	if(!bullet.update(1, wallList, bulletList, i, tankHost, tankClient)) {
+		            	if(bullet.getPosX()<0||bullet.getPosX()>1300||bullet.getPosY()<0||bullet.getPosY()>1300) {
+		            		//Removing bullets if they go out of bounds
+		            		bulletList.remove(i);
+		            		System.out.println("Removed bullet");
+		            	}
+	            	}
+
+	            	
 	            }
 	            
+
 	            
+	            //Rendering the players
+	            
+	            tankHost.render(gc);
+	            tankHost.update(1, wallList);
+	            tankHost.tickCooldown();
+	            tankClient.updateTurretRotation(mouseX, mouseY);
+	    		tankClient.render(gc);
+	    		tankClient.update(1,wallList);
+	    		tankClient.tickCooldown();
+	    	
 	    		//Checking win conditions
 	    		if(tankHost.getHP()<=0) {
 	    			clientWon=true;
@@ -219,6 +185,7 @@ public class GameTest extends Scene {
 	    			gc.setFont(endMessageFont);
 	    			gc.fillText(hostWonString, 600, 600);
 	    		}
+	    		
 	    		
 	        	//Render rate
 	    		gc.setFill(Color.WHITE);
@@ -236,8 +203,6 @@ public class GameTest extends Scene {
                     double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
                     gc.fillText(Double.toString(frameRate),60,50);
                 }
-                System.out.print("->"+java.lang.Thread.activeCount());
-                System.out.println("");
 	        }
 	    }.start();
 		

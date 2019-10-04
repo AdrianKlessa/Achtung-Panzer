@@ -23,7 +23,7 @@ public class Bullet extends Sprite {
 		this.belongsToHost=belongsToHost;
 	}
 	
-	public boolean update(double time, List<Wall> wallList, List<Bullet> bulletList, int index) {
+	public boolean update(double time, List<Wall> wallList, List<Bullet> bulletList, int index, Tank host, Tank client ) {
 		//Collisions with walls; returns true if collided and false if it didn't
 		boolean collision=false;
 		for(int i=0; i<wallList.size();i++) {
@@ -40,13 +40,32 @@ public class Bullet extends Sprite {
 			posY-=velY*time;
 		}
 		
+		posX+=velX*time;
+		posY+=velY*time;
+		if(this.intersects(client)) {
+			if(belongsToHost) {
+				client.reduceHP(damage);
+				bulletList.remove(index);
+				collision=true;
+			}
+		}
+		
+		if(this.intersects(host)) {
+			if(!belongsToHost) {
+				host.reduceHP(damage);
+				bulletList.remove(index);
+				collision=true;
+			}
+		}
+		
+		//Collisions with tanks
 		
 		if(collision==false) {
 			
 			posX+=velX*time;
 			posY+=velY*time;
 			
-		}	
+		}
 		return collision;
 
 	}

@@ -189,4 +189,8 @@ public class Tank extends Sprite {
 		}
 
 	}
+	
+	public void reduceHP(double amount) {
+		HP-=amount;
+	}
 }

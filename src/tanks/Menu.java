@@ -13,9 +13,11 @@ import javafx.scene.paint.Color;
 
 public class Menu extends Scene{
 	private static GridPane pane = new GridPane();
-	
+	String ip;
+	int port;
 	public Menu() {
 		super(pane,1200,800);
+
 		pane.setPadding(new Insets(50,50,50,50));
 		pane.setVgap(10);
 		pane.setHgap(10);		
@@ -61,7 +63,18 @@ public class Menu extends Scene{
 		buttonTest.setOnAction(e->{
 			
 			GameTest game = new GameTest();
-			Main.primaryStage.setScene(game);
+			Main.primaryStage.setScene(game);			
+		});
+		
+		buttonConnect.setOnAction(e->{
+			port=Integer.parseInt(portConnectField.getText());
+			ip=ipField.getText();
+			System.out.println(ip+":"+port);
+		});
+		
+		buttonHost.setOnAction(e->{
+			port=Integer.parseInt(portHostField.getText());
+			System.out.print(port);
 		});
 		
 	}
