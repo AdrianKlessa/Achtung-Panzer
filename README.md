@@ -1,6 +1,6 @@
 # Achtung-Panzer
 A LAN tank duelling game
-
+Not yet complete, not playable
 Resources used:
 
 Seamless Wall sprite by GrumpyDiamond - https://opengameart.org/content/tank-sprite
